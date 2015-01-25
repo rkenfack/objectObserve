@@ -1,3 +1,10 @@
+ /**
+ * This code ovewrite the native addEventLitener as well as removeEventLitener
+ * to te able to react on any changes. Some people don't like this but it's was the only way
+ * for me to get this work.
+ */
+
+
  if (!hasNativeObjectObserve) {
 
    window.addEventListener("load", function () {
