@@ -27,6 +27,31 @@ Object.observe(user, function(changes) {
 
 ```
 
+## Custom change type
+
+```
+// A point on a 2D plane
+var point = {x: 0, y: 0, distance: 0};
+
+function setPosition(pt, x, y) {
+  // Performing a custom change
+  Object.getNotifier(pt).performChange('reposition', function() {
+    var oldDistance = pt.distance;
+    pt.x = x;
+    pt.y = y;
+    pt.distance = Math.sqrt(x * x + y * y);
+    return {oldDistance: oldDistance};
+  });
+}
+
+Object.observe(point, function(changes) {
+  console.log('Distance change: ' + (point.distance - changes[0].oldDistance));
+}, ['reposition']);
+
+setPosition(point, 3, 4);
+
+```
+
 ## Browser support
 
 The polyfill supports all major browser including IE9
