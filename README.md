@@ -1,5 +1,5 @@
 # objectObserve
-A polyfill the Object.observe() based on the Polymer observe-js library
+An Object.observe polyfill based on the [Polymer observe-js](https://github.com/polymer/observe-js) library
 
 ## Example
 ```
