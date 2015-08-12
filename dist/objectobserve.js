@@ -2899,13 +2899,24 @@ System.register("lib/objectobserve", ["npm:babel-runtime@5.4.7/core-js/object/ke
           if (!Object.observe) {
 
             Object.getNotifier = function (targetObject) {
+
               return {
+
                 notify: function notify(notification) {
                   var observers = targetObject.$$__observers || {};
                   for (var observer in observers) {
                     observers[observer].callback.call(observers[observer].scope, notification);
                   }
+                },
+
+                performChange: function performChange(type, performFooChangeFn) {
+                  var notification = performFooChangeFn.call(this);
+                  if (typeof notification != "undefined") {
+                    notification.type = type;
+                    this.notify(notification);
+                  }
                 }
+
               };
             };
 
