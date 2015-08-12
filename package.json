@@ -1,7 +1,7 @@
 {
   "name": "objectObserve",
   "version": "1.0",
-  "description": "An Object.observe polyfill based on Polymer <a href='https://github.com/polymer/observe-js'>observe-js</a>",
+  "description": "An Object.observe polyfill based on [Polymer observe-js](https://github.com/polymer/observe-js)",
   "author": "Romeo Kenfack Tsakem",
   "license": "MIT",
   "jspm": {
