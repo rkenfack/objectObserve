@@ -761,6 +761,67 @@ System.register("lib/utils", [], function (_export) {
           "[object Error]": "Error"
         },
 
+        arrayChanges: function arrayChanges(oldArray, newArray) {
+
+          var changes = [];
+
+          var __changeNames = [];
+
+          var addChange = function addChange(type, name, oldValue) {
+            var combined = type + "_" + name;
+            if (__changeNames.indexOf(combined) == -1) {
+              var change = {
+                name: name,
+                type: type
+              };
+              if (typeof oldValue != "undefined") {
+                change.oldValue = oldValue;
+              }
+              changes.push(change);
+            }
+          };
+
+          var changeName = null;
+          var changeType = null;
+
+          if (oldArray.length != newArray.length) {
+
+            changes.push({
+              name: "length",
+              type: "update",
+              oldValue: oldArray.length
+            });
+
+            if (oldArray.length < newArray.length) {
+              for (var j = oldArray.length, len = newArray.length; j < len; j++) {
+                if (newArray[j] !== undefined) {
+                  addChange("add", j + "");
+                }
+              }
+            }
+
+            if (oldArray.length > newArray.length) {
+              for (var k = newArray.length; k < oldArray.length; k++) {
+                addChange("delete", k + "", oldArray[k]);
+              }
+            }
+          }
+
+          for (var i = 0, l = oldArray.length; i < l; i++) {
+            if (typeof newArray[i] != "undefined") {
+              if (!this.equals(oldArray[i], newArray[i])) {
+                addChange("update", i + "", oldArray[i]);
+              }
+            } else {
+              if (oldArray.length == newArray.length) {
+                addChange("delete", i + "", oldArray[i]);
+              }
+            }
+          }
+
+          return changes;
+        },
+
         getClass: function getClass(value) {
           // The typeof null and undefined is "object" under IE8
           if (value === undefined) {
@@ -1011,9 +1072,9 @@ System.register("lib/dirtycheck/eventListener", ["lib/utils", "lib/dirtycheck/di
                 });
 
                 __addEventListener.call(this, type, callback, useCapture);
+              } else {
+                __addEventListener.call(this, type, listener, useCapture);
               }
-
-              __addEventListener.call(this, type, listener, useCapture);
             };
           });
 
@@ -1034,14 +1095,14 @@ System.register("lib/dirtycheck/eventListener", ["lib/utils", "lib/dirtycheck/di
                   this.$$__observers[type].forEach(function (stored) {
                     if (stored.type == type && stored.listener == listener && stored.useCapture == useCapture) {
                       toRemove.push(stored);
-                      __removeEventListener.call(this, type, observerStore.callback, useCapture);
+                      __removeEventListener.call(this, type, stored.callback, useCapture);
                     }
-                  });
+                  }, this);
 
                   toRemove.forEach(function (observer) {
                     var index = this.$$__observers[type].indexOf(observer);
                     this.$$__observers[type].splice(index, 1);
-                  });
+                  }, this);
 
                   if (this.$$__observers[type].length === 0) {
                     delete this.$$__observers[type];
@@ -2945,83 +3006,14 @@ System.register("lib/objectobserve", ["npm:babel-runtime@5.4.7/core-js/object/ke
                   var i;
                   internalCallback = function (splice) {
 
-                    var acceptList;
-                    var changes = [];
-
                     model.$$__observers.listeners.forEach(function (listener) {
-
-                      changes = [];
-                      acceptList = listener.acceptList;
-
-                      splice.forEach(function (spl) {
-
-                        if (model.length < model.$$__observers.arrayLength) {
-
-                          if (isRecordValid("update", acceptList)) {
-                            for (i = spl.index; i < model.length; i++) {
-                              changes[i - spl.index] = {
-                                name: "" + i,
-                                object: model,
-                                oldValue: model.$$__observers.arrayCopy[i],
-                                type: "update"
-                              };
-                            }
-                          }
-
-                          if (isRecordValid("delete", acceptList)) {
-                            var removedStart = model.length;
-                            spl.removed.forEach(function (removed, index) {
-                              changes[changes.length] = {
-                                name: "" + (removedStart + index),
-                                object: model,
-                                oldValue: model.$$__observers.arrayCopy[removedStart + index],
-                                type: "delete"
-                              };
-                            });
-                          }
-                        } else if (model.length > model.$$__observers.arrayLength) {
-
-                          if (isRecordValid("add", acceptList)) {
-                            var offset = model.length - model.$$__observers.arrayLength;
-                            for (i = model.$$__observers.arrayLength - 1; i <= model.length; i++) {
-                              if (model[i] !== undefined) {
-                                changes[changes.length] = {
-                                  name: i + "",
-                                  object: model,
-                                  type: "add"
-                                };
-                              }
-                            }
-                          }
-                        } else {
-
-                          var changeStart = splice.index;
-                          var type = null;
-                          for (i = 0; i < spl.addedCount; i++) {
-                            type = model[spl.index + i] === undefined ? "delete" : "update";
-                            if (isRecordValid(type, acceptList)) {
-                              changes[changes.length] = {
-                                name: spl.index + i + "",
-                                object: model,
-                                oldValue: model.$$__observers.arrayCopy[spl.index + i],
-                                type: type
-                              };
-                            }
-                          }
-                        }
-                      });
-
-                      if (isRecordValid("update", acceptList)) {
-                        if (model.length != model.$$__observers.arrayLength) {
-                          changes[changes.length] = {
-                            name: "length",
-                            object: model,
-                            oldValue: model.$$__observers.arrayCopy.length,
-                            type: "update"
-                          };
-                        }
+                      var changes = utils.arrayChanges(model.$$__observers.arrayCopy, model);
+                      var acceptList = listener.acceptList;
+                      if (acceptList.length > 0) {
+                        changes = changes.filter(function (change) {
+                          return acceptList.indexOf(change.type) !== -1;
+                        });
                       }
-
                       listener.listener.call(this, changes);
                     });
 
