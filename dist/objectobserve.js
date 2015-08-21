@@ -1052,7 +1052,7 @@ System.register("lib/dirtycheck/eventListener", ["lib/utils", "lib/dirtycheck/di
 
               useCapture = typeof useCapture == "undefined" ? false : useCapture;
 
-              if (typeof listener == "function") {
+              if (this && typeof listener == "function") {
 
                 this.$$__observers = this.$$__observers || {};
                 if (!this.$$__observers[type]) {
