@@ -2999,7 +2999,7 @@ System.register("lib/objectobserve", ["npm:babel-runtime@5.4.7/core-js/object/ke
                   model.$$__observers = {
                     observer: new ArrayObserver(model),
                     listeners: [],
-                    arrayCopy: JSON.parse(JSON.stringify(model)),
+                    arrayCopy: model.slice(0),
                     arrayLength: model.length
                   };
 
@@ -3021,7 +3021,7 @@ System.register("lib/objectobserve", ["npm:babel-runtime@5.4.7/core-js/object/ke
 
                     if (model.$$__observers) {
                       model.$$__observers.arrayLength = model.length;
-                      model.$$__observers.arrayCopy = JSON.parse(JSON.stringify(model));
+                      model.$$__observers.arrayCopy = model.slice(0);
                     }
                   };
                 } else if (utils.isObject(model)) {
