@@ -6,7 +6,7 @@ An Object.observe polyfill based on the [Polymer observe-js](https://github.com/
 // A user model
 var user = {
   id: 0,
-  name: 'Brendan Eich',
+  name: 'Romeo Kenfack Tsakem',
   title: 'Mr.'
 };
 
